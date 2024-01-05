@@ -33,25 +33,12 @@ export default function Map({currentClimb, lastClimb, handleChoiceCallback, game
         console.log("Current climb: ", currentClimb, lat, lng);
         const payload = { target_id:`${currentClimb._id}`,lat: lat, lng: lng }
         const url = "http://localhost:3000/api";
-        const response = await fetch(`http://localhost:3000/api`, {
-            method: "POST",
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-        });
-
-        if(!response.ok) {
-            // handle errors
-            console.error(response);
+        const response = requestPOST(url, payload);
+        
+        if(response){
+            
         }
-        else {
-            const responseJSON = await response.json();
-            setLastClickedPoint({lat:lat, lng:lng});
-            handleChoiceCallback(responseJSON);
-            console.log(responseJSON)
-        }  
+        
     };
 
     const onLoad = (map) => {

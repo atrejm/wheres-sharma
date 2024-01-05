@@ -1,7 +1,7 @@
 type jwToken = string | null;
 
 
-export async function requestPOST(url: string, body: object): Promise<object>{
+export async function requestPOST(url: string, body: object): Promise<object | null>{
     const payload = body;
     
     const token :jwToken = sessionStorage.getItem("token");
@@ -19,11 +19,11 @@ export async function requestPOST(url: string, body: object): Promise<object>{
     if(!response.ok) {
         // handle errors
         res = await response.json();
-        res.ok = false;
+        console.error(res);
+        return null;
     }
     else {
         res = await response.json();
-        res.ok = true;
     }  
     
     return res;
