@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
-import React from 'react'
 import '../styles/Map.css'
-import GoogleMapReact from 'google-map-react';
-import { DotenvConfigOptions, configDotenv } from 'dotenv';
-import { Loader } from '@googlemaps/js-api-loader';
+import '../helpers/sendRequest'
 import { GoogleMap, useJsApiLoader, Marker, useGoogleMap } from '@react-google-maps/api';
+import { requestGET, requestPOST } from '../helpers/sendRequest';
 
 
 export default function Map({currentClimb, lastClimb, handleChoiceCallback, gameStatus}) {
@@ -34,6 +32,7 @@ export default function Map({currentClimb, lastClimb, handleChoiceCallback, game
 
         console.log("Current climb: ", currentClimb, lat, lng);
         const payload = { target_id:`${currentClimb._id}`,lat: lat, lng: lng }
+        const url = "http://localhost:3000/api";
         const response = await fetch(`http://localhost:3000/api`, {
             method: "POST",
             mode: "cors",
