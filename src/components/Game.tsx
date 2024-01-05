@@ -16,13 +16,12 @@ export type Climb = {
 
 export type Area = {
     _id: string,
-    name: string
+    name: string,
+    selected: boolean
 }
 
 export default function Game() {
     const [gameStatus, setGameStatus] = useState({roundsLeft: 5, isActive: true});
-    const [gameActive, setGameActive] = useState(true);
-    const [roundsLeft, setRoundLeft] = useState(5);
     const [areas, setAreas] = useState([]);
     const [currentArea, setCurrentArea] = useState(null);
     const [climbs, setClimbs] = useState([]);
@@ -47,9 +46,9 @@ export default function Game() {
             }
             else {
                 const responseJSON = await response.json();
-                const areas :Array<Climb> = [];
+                const areas :Array<Area> = [];
                 responseJSON.forEach(element => {
-                    areas.push({_id: element._id, name: element.name})
+                    areas.push({_id: element._id, name: element.name, selected:true})
                 });
                 
                 setCurrentArea(areas[0]);
@@ -76,7 +75,7 @@ export default function Game() {
             }
             else {
                 const responseJSON :Array<Climb> = await response.json();
-                const randomClimbs = getRandomFromClimbIDs(roundsLeft, responseJSON);
+                const randomClimbs = getRandomFromClimbIDs(gameStatus.roundsLeft, responseJSON);
                 setClimbs(randomClimbs);
             }
         }
@@ -118,7 +117,7 @@ export default function Game() {
     return(
         <>
             <div className="container">
-                <GameUI currentClimb={currentClimb} score={score} gameStatus={gameStatus}/>
+                <GameUI currentClimb={currentClimb} score={score} gameStatus={gameStatus} areas={areas}/>
                 <Map currentClimb={currentClimb} lastClimb={lastClimb} handleChoiceCallback={handleGameChoice} gameStatus={gameStatus}/>
             </div>
         </>
