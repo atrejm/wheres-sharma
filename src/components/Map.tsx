@@ -32,11 +32,13 @@ export default function Map({currentClimb, lastClimb, handleChoiceCallback, game
 
         console.log("Current climb: ", currentClimb, lat, lng);
         const payload = { target_id:`${currentClimb._id}`,lat: lat, lng: lng }
-        const url = "http://localhost:3000/api";
-        const response = requestPOST(url, payload);
+        const url = sessionStorage.getItem("apiURL");
+        const response = await requestPOST(url, payload);
         
         if(response){
-            
+            console.log(response);
+            setLastClickedPoint({lat:lat, lng:lng});
+            handleChoiceCallback(response);
         }
         
     };
@@ -44,7 +46,6 @@ export default function Map({currentClimb, lastClimb, handleChoiceCallback, game
     const onLoad = (map) => {
         const bounds = new window.google.maps.LatLngBounds(defaultProps.center);
         map.fitBounds(bounds);
-        map.setZoom(100000000);
         map.setMapTypeId('satellite');
         //map.addListener("click", onClick)
         setMap(map);
@@ -83,8 +84,6 @@ export default function Map({currentClimb, lastClimb, handleChoiceCallback, game
             map:map
         });
 
-        //marker.setMap(map);
-        //polyLine.setMap(map);
         map.panTo(endMarker.position);
         console.log("New marker", endMarker);
     }

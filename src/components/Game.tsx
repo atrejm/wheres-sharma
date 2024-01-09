@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import Map from "./Map";
 import GameUI from "./GameUI";
 import { getRandomFromClimbIDs } from "../helpers/climbFinderHelper";
+import { requestGET, requestPOST } from "../helpers/sendRequest";
 import _ from 'lodash';
 import calculateScore from "../helpers/calculateScore";
 
@@ -32,53 +33,31 @@ export default function Game() {
     // These three hooks populate all of the states above in concurrent order
     useEffect(() => {
         async function getAreas() {
-            const response: Response = await fetch(`http://localhost:3000/api/areas`, {
-                method: "GET",
-                mode: "cors",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+            const url = sessionStorage.getItem("apiURL") + "/areas";
+            const areas = await requestGET(url);
 
-            if(!response.ok) {
-                // handle errors
-                console.error(response);
-            }
-            else {
-                const responseJSON = await response.json();
-                const areas :Array<Area> = [];
-                responseJSON.forEach(element => {
-                    areas.push({_id: element._id, name: element.name, selected:true})
-                });
-                
+            if(areas) {
+                console.log("setting areas?")
                 setCurrentArea(areas[0]);
                 setAreas(areas);
-            } 
+            }
         }
         getAreas();
     }, [])
 
     useEffect(()=> {
         async function getClimbs(area: Area) {
-            const response: Response = await fetch(`http://localhost:3000/api/climbs`, {
-                method: "POST",
-                mode: "cors",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({"trim_data":true,"area_id":area._id})
-            });
+            const url = sessionStorage.getItem("apiURL") + "/climbs";
+            const body = {"trim_data":true,"area_id":area._id};
+            
+            const allClimbs = await requestPOST(url, body);
 
-            if(!response.ok) {
-                // handle errors
-                console.error(response);
-            }
-            else {
-                const responseJSON :Array<Climb> = await response.json();
-                const randomClimbs = getRandomFromClimbIDs(gameStatus.roundsLeft, responseJSON);
+            if(allClimbs) {
+                const randomClimbs = getRandomFromClimbIDs(gameStatus.roundsLeft, allClimbs);
                 setClimbs(randomClimbs);
             }
         }
+
         if(currentArea){
             getClimbs(currentArea);
         }
@@ -100,11 +79,11 @@ export default function Game() {
         setGameStatus({roundsLeft:gameStatus.roundsLeft-1, isActive:gameStatus.isActive})
     }
 
-    const handleGameChoice = (responseJSON) => {
-        console.log("Handling game logic with response: ", responseJSON);
-        const last :Climb = responseJSON.correct_climb;
+    const handleGameChoice = (choiceResponse) => {
+        console.log("Handling game logic with response: ", choiceResponse);
+        const last :Climb = choiceResponse.correct_climb;
         setLastClimb(last)
-        setScore(score + calculateScore(responseJSON.distance))
+        setScore(score + calculateScore(choiceResponse.distance))
 
         if(gameStatus.roundsLeft > 1){
             removeCurrentClimbFromAvailableChoices();

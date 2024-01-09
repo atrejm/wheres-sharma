@@ -23,13 +23,14 @@ export async function requestPOST(url: string, body: object): Promise<object | n
         return null;
     }
     else {
+        console.log("Successfully returning POST request");
         res = await response.json();
     }  
     
     return res;
 }
 
-export async function requestGET(url: string): Promise<object>{
+export async function requestGET(url: string): Promise<object | null>{
 
     const token :jwToken = sessionStorage.getItem("token");
     const response = await fetch(url, {
@@ -45,11 +46,11 @@ export async function requestGET(url: string): Promise<object>{
     if(!response.ok) {
         // handle errors
         res = await response.json();
-        res.ok = false;
+        console.error(res);
+        return null;
     }
     else {
         res = await response.json();
-        res.ok = true;
     }  
     
     return res;
