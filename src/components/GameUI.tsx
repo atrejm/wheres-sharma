@@ -1,16 +1,23 @@
 import { ProgressBar } from "react-bootstrap"
+import { Climb } from "./Game";
+import { GameMode, GameStatus } from "../App";
 
-export default function GameUI({currentClimb, score, gameStatus, areas}) {
+interface Props {
+    currentClimb: Climb | null,
+    gameStatus: GameStatus,
+}
 
-    console.log(areas);
+export default function GameUI({currentClimb, gameStatus} :Props) {
+
+    console.log(gameStatus.areasSelected);
     return(
         <>
             <div className="container" data-bs-theme="dark">
-                {gameStatus.isActive?
+                {gameStatus.mode === GameMode.Running ?
                 <>
                     <div className="container">
                         <div className="btn-group">
-                            {areas.map((area)=> (
+                            {gameStatus.areasSelected.map((area)=> (
                                 <button 
                                     className={area.selected?"btn btn-outline-secondary active"
                                                             :"btn btn-outline-secondary"} 
@@ -22,17 +29,17 @@ export default function GameUI({currentClimb, score, gameStatus, areas}) {
                     </div>
                     <div className="container">
                         <h1>Where is {currentClimb? currentClimb.name : ""}? Hint: {currentClimb? currentClimb.zone : ""}</h1>
-                        <ProgressBar now={100 - gameStatus.roundsLeft/5*100}/>
+                        <ProgressBar now={100 - gameStatus.roundsRemaining/5*100}/>
                     </div>
                 </>
                 :
                 <div>
                     <h1>Game Over!</h1>
-                    <ProgressBar now={100 - gameStatus.roundsLeft/5*100}/>
+                    <ProgressBar now={100 - gameStatus.roundsRemaining/5*100}/>
                 </div>
                 }
                 <div className="container">
-                    <h3>Score: {score} </h3>
+                    <h3>Score: {gameStatus.score} </h3>
                 </div>
             </div>
         </>

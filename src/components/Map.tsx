@@ -3,6 +3,7 @@ import '../styles/Map.css'
 import '../helpers/sendRequest'
 import { GoogleMap, useJsApiLoader, Marker, useGoogleMap } from '@react-google-maps/api';
 import { requestGET, requestPOST } from '../helpers/sendRequest';
+import { GameMode } from '../App';
 
 
 export default function Map({currentClimb, lastClimb, handleChoiceCallback, gameStatus}) {
@@ -99,7 +100,7 @@ export default function Map({currentClimb, lastClimb, handleChoiceCallback, game
                     zoom={17}
                     onLoad={onLoad}
                     onUnmount={onUnmount}
-                    onClick={gameStatus.isActive ? onClick : null}
+                    onClick={gameStatus.mode === GameMode.Running ? onClick : null}
                 >
 
                 </GoogleMap>

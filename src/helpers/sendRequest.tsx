@@ -1,7 +1,9 @@
+import { Area, Climb } from "../components/Game";
+
 type jwToken = string | null;
 
 
-export async function requestPOST(url: string, body: object): Promise<object | null>{
+export async function requestPOST(url: string, body: object): Promise<object | Array<Climb> | null>{
     const payload = body;
     
     const token :jwToken = sessionStorage.getItem("token");
@@ -30,7 +32,7 @@ export async function requestPOST(url: string, body: object): Promise<object | n
     return res;
 }
 
-export async function requestGET(url: string): Promise<object | null>{
+export async function requestGET(url: string): Promise<Array<Area>>{
 
     const token :jwToken = sessionStorage.getItem("token");
     const response = await fetch(url, {
