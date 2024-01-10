@@ -3,16 +3,30 @@ import '../styles/Map.css'
 import '../helpers/sendRequest'
 import { GoogleMap, useJsApiLoader, Marker, useGoogleMap } from '@react-google-maps/api';
 import { requestGET, requestPOST } from '../helpers/sendRequest';
-import { GameMode } from '../App';
+import { GameMode, GameStatus } from '../App';
+import { Climb } from './Game';
 
+interface Props{
+    currentClimb: Climb;
+    lastClimb: Climb;
+    handleGuess: ({correct_climb, distance} : {correct_climb:Climb, distance: number})=>void;
+    gameStatus: GameStatus;
+}
 
-export default function Map({currentClimb, lastClimb, handleChoiceCallback, gameStatus}) {
-    const [map, setMap] = useState(null);
-    const [lastClickedPoint, setLastClickedPoint] = useState(null);
-    const [center, setCenter] = useState({
-        lat: 37.329399, 
-        lng: -118.577428
-    });
+interface GoogleMapClickEvent{
+    latLng: {
+        lat: () => void,
+        lng: () => void
+    }
+}
+
+interface Point{
+    lat: number,
+    lng: number
+}
+
+export default function MapComponent({currentClimb, lastClimb, handleGuess: handleGuess, gameStatus, map, setMap} : Props) {
+    const [lastClickedPoint, setLastClickedPoint] = useState<Point | null>(null);
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
@@ -27,7 +41,8 @@ export default function Map({currentClimb, lastClimb, handleChoiceCallback, game
         zoom: 0
     };
 
-    const onClick = async (mapMouseEvent) => {
+    const onClick = async (mapMouseEvent: GoogleMapClickEvent) => {
+        console.log(mapMouseEvent);
         const lat = mapMouseEvent.latLng.lat();
         const lng = mapMouseEvent.latLng.lng();
 
@@ -39,7 +54,7 @@ export default function Map({currentClimb, lastClimb, handleChoiceCallback, game
         if(response){
             console.log(response);
             setLastClickedPoint({lat:lat, lng:lng});
-            handleChoiceCallback(response);
+            handleGuess(response);
         }
         
     };
@@ -102,7 +117,6 @@ export default function Map({currentClimb, lastClimb, handleChoiceCallback, game
                     onUnmount={onUnmount}
                     onClick={gameStatus.mode === GameMode.Running ? onClick : null}
                 >
-
                 </GoogleMap>
             </div>
         </>

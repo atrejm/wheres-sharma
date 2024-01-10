@@ -12,6 +12,7 @@ export default function GameOver({gameStatus, setGameStatus} :Props) {
         setGameStatus({
             mode: GameMode.Initialization,
             areasSelected: [],
+            climbs: [],
             score: 0,
             roundsRemaining: 5
         })

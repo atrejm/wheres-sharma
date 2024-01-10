@@ -2,7 +2,8 @@ import './App.css'
 import Game, { Area, Climb } from './components/Game'
 import GameOver from './components/GameOver'
 import Menu from './components/Menu'
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { requestGET, requestPOST } from './helpers/sendRequest'
 
 export enum GameMode {
   Initialization,
@@ -13,6 +14,7 @@ export enum GameMode {
 export interface GameStatus {
   mode: GameMode,
   areasSelected: Array<Area>,
+  climbs: Array<Climb>,
   roundsRemaining: number,
   score: number
 }
@@ -21,13 +23,10 @@ function App() {
   const [gameStatus, setGameStatus] = useState<GameStatus>({
     mode: GameMode.Initialization,
     areasSelected: [],
+    climbs: [],
     roundsRemaining: 5,
     score: 0
   });
-
-  const handleUpdateGameStatus = (newStatus: GameStatus) => {
-    setGameStatus(newStatus);
-  }
   
   const modeToRender = (mode: GameMode) => {
     switch (mode) {
