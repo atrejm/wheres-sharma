@@ -1,4 +1,4 @@
-import { Dispatch, EventHandler, MouseEventHandler, SetStateAction, useEffect, useState } from "react"
+import { Dispatch, EventHandler, HTMLInputTypeAttribute, MouseEventHandler, SetStateAction, useEffect, useState } from "react"
 import { GameMode, GameStatus } from "../App"
 import { Area, Climb } from "./Game"
 import { requestGET, requestPOST } from "../helpers/sendRequest"
@@ -114,6 +114,77 @@ export default function Menu({gameStatus, setGameStatus}: Props) {
         setSelectRoundButtons(selectRoundButtons.slice());
     }
 
+    // handle username signup and login
+    const [username, setUsername] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [error, setError] = useState<string | null>(null);
+
+    const handleUsernameChange : React.ChangeEventHandler<HTMLInputElement> = (e) => {
+        setUsername(e.target.value);
+    }
+
+    const handlePasswordChange : React.ChangeEventHandler<HTMLInputElement> = (e) => {
+        setPassword(e.target.value);
+    }
+
+    const handleLogin : React.FormEventHandler<HTMLButtonElement> = async (e) => {
+        e.preventDefault();
+        const url = sessionStorage.getItem("apiURL") + "/login";
+        const response = await fetch(url, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({username:username, password:password}),
+        });
+
+        if(!response.ok) {
+            // handle errors
+            console.error(response);
+        }
+        else {
+            const resJSON = await response.json();
+            if(resJSON.error) {
+                setError(resJSON.error);
+            } else {
+                setError(null);
+                sessionStorage.setItem("token", resJSON.jwtToken);
+                sessionStorage.setItem("userID", resJSON.user._id);
+                sessionStorage.setItem("username", resJSON.user.username);
+            }
+        }
+    }
+
+    const handleRegister : React.FormEventHandler<HTMLButtonElement> = async (e) => {
+        e.preventDefault();
+        const url = sessionStorage.getItem("apiURL") + "/login";
+        const response = await fetch(url, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({username:username, password:password}),
+        });
+
+        if(!response.ok) {
+            // handle errors
+            console.error(response);
+        }
+        else {
+            const resJSON = await response.json();
+            if(resJSON.error) {
+                setError(resJSON.error);
+            } else {
+                setError(null);
+                sessionStorage.setItem("token", resJSON.jwtToken);
+                sessionStorage.setItem("userID", resJSON.user._id);
+                sessionStorage.setItem("username", resJSON.user.username);
+            }
+        }
+    }
+
     return(
         <>
             <div className="container">
@@ -149,9 +220,65 @@ export default function Menu({gameStatus, setGameStatus}: Props) {
                             ))}
                         </div>
                     </div>
+                    
+                    <hr className="my-4"></hr>
+                    {sessionStorage.getItem("username") ?
+                    <div className="container">
+                        Welcome, {sessionStorage.getItem("username")}
+                    </div>
+                    :
+                    <div className="container">
+                        <form>
+                            <div className="form-group" style={{maxWidth:"30em"}}>
+                                <small className="text-muted">If you want your score on the leaderboard, you must be logged in</small>
+                                {error ?
+                                <div className="alert alert-danger p-1" role="alert">
+                                    <small className="text-error">{error}</small>
+                                </div>
+                                :
+                                <></>
+                                }
+                                <div className="form-group">
+                                    <label htmlFor="username">Username</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-control" 
+                                        id="username" 
+                                        placeholder="Username"
+                                        onChange={handleUsernameChange}></input>
+                                </div>
+                                <div className="form-group mb-3">
+                                    <label htmlFor="password">Password</label>
+                                    <input 
+                                        type="password" 
+                                        className="form-control" 
+                                        id="password" 
+                                        placeholder="Password"
+                                        onChange={handlePasswordChange}></input>
+                                </div>
+                            </div>
+                            <div>
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-success btn-sm mx-1"
+                                    onClick={handleLogin}>
+                                        Login
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-success btn-sm mx-1"
+                                    onClick={handleRegister}>
+                                        Register
+                                </button>
+                            </div>
+                        </form>
+                    </div>      
+                    }
 
                     <hr className="my-4"></hr>
-                    <button className="btn btn-primary btn-lg" onClick={handleGameStart}>Start Game</button>
+                    <div className="container">
+                        <button className="btn btn-success btn-lg" onClick={handleGameStart}>Start Game</button>
+                    </div>
                 </div>
             </div>
         </>

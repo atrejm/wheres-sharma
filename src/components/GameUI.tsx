@@ -13,6 +13,8 @@ export default function GameUI({currentClimb, gameStatus, handleCenterMap} :Prop
     const handleClickToPanMap: React.MouseEventHandler<HTMLButtonElement> = (e) => {
         const areaID = e.currentTarget.value;
         const areaIndex = gameStatus.areasSelected.findIndex((area) => area._id === areaID);
+
+        console.log(`AreaID: ${areaID}, Index: ${areaIndex}`);
         handleCenterMap({lat:gameStatus.areasSelected[areaIndex].lat, 
                          lng:gameStatus.areasSelected[areaIndex].lng});
         console.log(gameStatus.areasSelected[areaIndex]);
