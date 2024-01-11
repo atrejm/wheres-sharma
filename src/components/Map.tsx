@@ -39,24 +39,21 @@ export default function MapComponent({currentClimb, lastClimb, handleGuess: hand
 
     const defaultProps = {
         center: {
-            lat: 37.329399, 
-            lng: -118.577428
+            lat: gameStatus.areasSelected[0].lat, 
+            lng: gameStatus.areasSelected[0].lng
         },
-        zoom: 0
+        zoom: 10
     };
 
     const onClick = async (mapMouseEvent: GoogleMapClickEvent) => {
-        console.log(mapMouseEvent);
         const lat = mapMouseEvent.latLng.lat();
         const lng = mapMouseEvent.latLng.lng();
 
-        console.log("Current climb: ", currentClimb, lat, lng);
         const payload = { target_id:`${currentClimb._id}`,lat: lat, lng: lng }
         const url = sessionStorage.getItem("apiURL");
         const response = await requestPOST(url, payload);
         
         if(response){
-            console.log("Map click Response: ", response);
             setLastClickedPoint({lat:lat, lng:lng});
             handleGuess(response);
         }

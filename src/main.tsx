@@ -4,7 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import 'dotenv';
 
-sessionStorage.setItem("apiURL", "http://localhost:3000/api");
+sessionStorage.setItem("apiURL", "https://wheres-sharma-backend.fly.dev/api");
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
 

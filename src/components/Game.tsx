@@ -43,7 +43,6 @@ export default function Game({gameStatus, setGameStatus} :Props) {
         if(gameStatus.climbs.length === 0) { return; }
 
         const climb = gameStatus.climbs[_.random(0,gameStatus.climbs.length-1)]
-        console.log("Updating current climb to: ", climb);
         setCurrentClimb(climb);
     }, [gameStatus])
 
@@ -62,10 +61,8 @@ export default function Game({gameStatus, setGameStatus} :Props) {
     }
 
     const handleGuess = (choiceResponse: {correct_climb: Climb, distance: number}) => {
-        console.log("Handling game logic with response: ", choiceResponse);
         const last :Climb = choiceResponse.correct_climb;
         const score: number = calculateScore(choiceResponse.distance, gameStatus.areasSelected.length);
-        console.log(`Adding score: ${score} to total score: ${gameStatus.score}`);
         setLastClimb(last)
 
         if(gameStatus.roundsRemaining > 1){

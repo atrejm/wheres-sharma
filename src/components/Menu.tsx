@@ -82,10 +82,16 @@ export default function Menu({gameStatus, setGameStatus}: Props) {
         return climbs;
     }
 
+    const [zoneError, setZoneError] = useState(null);
     const handleGameStart = async () => {
         const selectedAreas :Array<Area>= [];
         allAreas.forEach((area) => (area.selected ? selectedAreas.push(area.areaObj) : null))        
         const climbs :Array<Climb> = await populateGame(selectedRoundOption, selectedAreas);
+        if(selectedAreas.length === 0) {
+            setZoneError("You must choose at least one Zone");
+            return;
+        }
+        setZoneError(null);
         console.log("Starting game with:", climbs);
         setGameStatus({
             mode: GameMode.Running,
@@ -199,6 +205,7 @@ export default function Menu({gameStatus, setGameStatus}: Props) {
                     <div className="container">
                         <h4 className="display">Select Zones</h4>
                         <p>The more zones you select, the higher your point multiplier will be.</p>
+                        {zoneError?<div><small className="alert alert-danger p-1">{zoneError}</small></div>:<></>}
                         <div className="button-group">
                             {allAreas.map((area) => (
                                 <button className={area.selected?"btn btn-success active":"btn btn-outline-dark"}
