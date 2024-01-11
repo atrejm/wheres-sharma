@@ -5,10 +5,11 @@ import { GameMode, GameStatus } from "../App";
 interface Props {
     currentClimb: Climb | null,
     gameStatus: GameStatus,
+    totalRounds: number,
     handleCenterMap: ({lat, lng}: {lat:number, lng:number}) => void,
 }
 
-export default function GameUI({currentClimb, gameStatus, handleCenterMap} :Props) {
+export default function GameUI({currentClimb, gameStatus, totalRounds, handleCenterMap} :Props) {
 
     const handleClickToPanMap: React.MouseEventHandler<HTMLButtonElement> = (e) => {
         const areaID = e.currentTarget.value;
@@ -17,10 +18,8 @@ export default function GameUI({currentClimb, gameStatus, handleCenterMap} :Prop
         console.log(`AreaID: ${areaID}, Index: ${areaIndex}`);
         handleCenterMap({lat:gameStatus.areasSelected[areaIndex].lat, 
                          lng:gameStatus.areasSelected[areaIndex].lng});
-        console.log(gameStatus.areasSelected[areaIndex]);
     }
 
-    console.log(gameStatus.areasSelected);
     return(
         <>
             <div className="container" data-bs-theme="dark">
@@ -41,18 +40,20 @@ export default function GameUI({currentClimb, gameStatus, handleCenterMap} :Prop
                         </div>
                     </div>
                     <div className="container">
-                        <h1>Where is {currentClimb? currentClimb.name : ""}? Hint: {currentClimb? <>{currentClimb.zone}</> : ""}</h1>
-                        <ProgressBar now={100 - gameStatus.roundsRemaining/5*100}/>
+                        <h3>Where is {currentClimb? currentClimb.name : ""}? Hint: {currentClimb? <>{currentClimb.zone}</> : ""}</h3>
+                        <ProgressBar 
+                            now={100 - gameStatus.roundsRemaining/totalRounds*100}
+                            label={totalRounds - gameStatus.roundsRemaining + "/" + totalRounds}/>
                     </div>
                 </>
                 :
                 <div>
                     <h1>Game Over!</h1>
-                    <ProgressBar now={100 - gameStatus.roundsRemaining/5*100}/>
+                    <ProgressBar now={100 - gameStatus.roundsRemaining/totalRounds*100}/>
                 </div>
                 }
                 <div className="container">
-                    <h3>Score: {gameStatus.score} </h3>
+                    <h5>Score: {gameStatus.score} </h5>
                 </div>
             </div>
         </>

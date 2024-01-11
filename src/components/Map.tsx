@@ -1,16 +1,20 @@
-import { useEffect, useState } from 'react'
+// @ts-nocheck
+
+import { Dispatch, SetStateAction, useState } from 'react'
 import '../styles/Map.css'
 import '../helpers/sendRequest'
-import { GoogleMap, useJsApiLoader, Marker, useGoogleMap } from '@react-google-maps/api';
-import { requestGET, requestPOST } from '../helpers/sendRequest';
+import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+import { requestPOST } from '../helpers/sendRequest';
 import { GameMode, GameStatus } from '../App';
 import { Climb } from './Game';
 
 interface Props{
-    currentClimb: Climb;
-    lastClimb: Climb;
+    currentClimb: Climb | null;
+    lastClimb: Climb | null;
     handleGuess: ({correct_climb, distance} : {correct_climb:Climb, distance: number})=>void;
     gameStatus: GameStatus;
+    map: GoogleMap | null;
+    setMap: Dispatch<SetStateAction<GoogleMap>> | null;
 }
 
 interface GoogleMapClickEvent{
@@ -52,7 +56,7 @@ export default function MapComponent({currentClimb, lastClimb, handleGuess: hand
         const response = await requestPOST(url, payload);
         
         if(response){
-            console.log(response);
+            console.log("Map click Response: ", response);
             setLastClickedPoint({lat:lat, lng:lng});
             handleGuess(response);
         }
@@ -67,7 +71,7 @@ export default function MapComponent({currentClimb, lastClimb, handleGuess: hand
         setMap(map);
     }
     
-    const onUnmount = (map) => {
+    const onUnmount = () => {
         setMap(null);
     }
 
@@ -95,13 +99,12 @@ export default function MapComponent({currentClimb, lastClimb, handleGuess: hand
             shouldFocus: false,
         })
 
-        const polyLine = new window.google.maps.Polyline({
+        new window.google.maps.Polyline({
             path:[startMarker.position, endMarker.position],
             map:map
         });
 
         map.panTo(endMarker.position);
-        console.log("New marker", endMarker);
     }
 
     return (isLoaded?
@@ -111,7 +114,7 @@ export default function MapComponent({currentClimb, lastClimb, handleGuess: hand
             </div>
             <div className='google-map container p-0'>
                 <GoogleMap
-                    mapContainerStyle={{width: "100%", height: "80vh"}}
+                    mapContainerStyle={{width: "100%", height: "100%"}}
                     zoom={17}
                     onLoad={onLoad}
                     onUnmount={onUnmount}

@@ -1,5 +1,6 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { GameMode, GameStatus } from "../App";
+import { uploadLatestGameScore } from "../helpers/sendRequest";
 
 interface Props {
     gameStatus: GameStatus,
@@ -7,6 +8,17 @@ interface Props {
 }
 
 export default function GameOver({gameStatus, setGameStatus} :Props) {
+
+    useEffect(() => {
+        //Once when this screen renders
+        const upload = async () => {
+            const url = sessionStorage.getItem("apiURL")
+            if (url)
+                await uploadLatestGameScore(gameStatus.score, url, []); // this should eventually send the game history
+        }
+        
+        upload();
+    }, []);
 
     const handleRestart = () => {
         setGameStatus({

@@ -1,12 +1,10 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import MapComponent from "./Map";
 import GameUI from "./GameUI";
-import { getRandomFromClimbIDs } from "../helpers/climbFinderHelper";
-import { requestGET, requestPOST } from "../helpers/sendRequest";
-import _, { isArray } from 'lodash';
+import _ from 'lodash';
 import calculateScore from "../helpers/calculateScore";
 import { GameMode, GameStatus } from "../App";
-import { GoogleMap, GoogleMapProps } from "@react-google-maps/api";
+import { GoogleMap } from "@react-google-maps/api";
 
 export type Climb = {
     _id: string,
@@ -31,21 +29,25 @@ interface Props {
 }
 
 export default function Game({gameStatus, setGameStatus} :Props) {
-    const [climbs, setClimbs] = useState<Array<Climb>>([]);
     const [currentClimb, setCurrentClimb] = useState<Climb | null>(null);
     const [lastClimb, setLastClimb] = useState<Climb | null>(null);
     const [map, setMap] = useState<GoogleMap | null>(null);
+    const [totalRounds, setTotalRounds] = useState<number>(0);
+
+    // called once when initialized
+    useEffect(() => {
+        setTotalRounds(gameStatus.roundsRemaining);
+    }, [])
 
     useEffect(()=> {
         if(gameStatus.climbs.length === 0) { return; }
 
-        console.log(gameStatus.climbs);
         const climb = gameStatus.climbs[_.random(0,gameStatus.climbs.length-1)]
         console.log("Updating current climb to: ", climb);
         setCurrentClimb(climb);
     }, [gameStatus])
 
-    const removeCurrentClimbFromAvailableChoices = () => {
+    const updateScoreAndRemoveClimbFromChoices = (score: number) => {
         const index = gameStatus.climbs.findIndex((element) => element == currentClimb)
         const updatedClimbs = gameStatus.climbs
         updatedClimbs.splice(index, 1);
@@ -54,7 +56,7 @@ export default function Game({gameStatus, setGameStatus} :Props) {
             areasSelected: gameStatus.areasSelected,
             climbs: updatedClimbs,
             roundsRemaining: gameStatus.roundsRemaining - 1,
-            score: gameStatus.score,
+            score: gameStatus.score + score,
         })
         //setGameStatus({roundsLeft:gameStatus.roundsLeft-1, isActive:gameStatus.isActive})
     }
@@ -62,18 +64,12 @@ export default function Game({gameStatus, setGameStatus} :Props) {
     const handleGuess = (choiceResponse: {correct_climb: Climb, distance: number}) => {
         console.log("Handling game logic with response: ", choiceResponse);
         const last :Climb = choiceResponse.correct_climb;
-        const score: number = calculateScore(choiceResponse.distance);
+        const score: number = calculateScore(choiceResponse.distance, gameStatus.areasSelected.length);
+        console.log(`Adding score: ${score} to total score: ${gameStatus.score}`);
         setLastClimb(last)
-        setGameStatus({
-            areasSelected: gameStatus.areasSelected,
-            climbs: gameStatus.climbs,
-            mode: gameStatus.mode,
-            roundsRemaining: gameStatus.roundsRemaining,
-            score: gameStatus.score + score,
-        })
 
         if(gameStatus.roundsRemaining > 1){
-            removeCurrentClimbFromAvailableChoices();
+            updateScoreAndRemoveClimbFromChoices(score);
         } else {
             setGameStatus({
                 areasSelected: gameStatus.areasSelected,
@@ -87,10 +83,10 @@ export default function Game({gameStatus, setGameStatus} :Props) {
     }
 
     const handleCenterMap = (newCenter: {lat:number, lng:number}) => {
-
         if(map){
             map.panTo(newCenter)
-            map.setZoom(18);
+            //@ts-expect-error ts claims that map.zetzoom doesn't exist, but it does
+            map.setZoom(18); 
         }
     }
 
@@ -100,12 +96,14 @@ export default function Game({gameStatus, setGameStatus} :Props) {
                 <GameUI 
                     currentClimb={currentClimb} 
                     gameStatus={gameStatus}
-                    handleCenterMap={handleCenterMap}/>
+                    handleCenterMap={handleCenterMap}
+                    totalRounds={totalRounds}/>
                 <MapComponent 
                     currentClimb={currentClimb} 
                     lastClimb={lastClimb} 
                     handleGuess={handleGuess}
                     map={map}
+                    //@ts-expect-error don worry about it
                     setMap={setMap} 
                     gameStatus={gameStatus}/>
             </div>

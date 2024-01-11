@@ -2,8 +2,8 @@ import './App.css'
 import Game, { Area, Climb } from './components/Game'
 import GameOver from './components/GameOver'
 import Menu from './components/Menu'
-import { createContext, useContext, useEffect, useState } from 'react'
-import { requestGET, requestPOST } from './helpers/sendRequest'
+import { useState } from 'react'
+import HighScorePanel from './components/HighscorePanel'
 
 export enum GameMode {
   Initialization,
@@ -28,6 +28,8 @@ function App() {
     score: 0
   });
   
+  console.debug("SCORE: ", gameStatus.score);
+
   const modeToRender = (mode: GameMode) => {
     switch (mode) {
       case GameMode.Initialization:
@@ -42,9 +44,14 @@ function App() {
   }
 
   return (
-    <>
-      {modeToRender(gameStatus.mode)}
-    </>
+    <div className='row'>
+      <div className='col-8'>
+        {modeToRender(gameStatus.mode)}
+      </div>
+      <div className='col-4'>
+        <HighScorePanel gameStatus={gameStatus}/>
+      </div>
+    </div>
   )
 }
 

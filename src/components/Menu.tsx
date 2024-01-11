@@ -1,12 +1,14 @@
+//@ts-nocheck
+
 import { Dispatch, EventHandler, HTMLInputTypeAttribute, MouseEventHandler, SetStateAction, useEffect, useState } from "react"
 import { GameMode, GameStatus } from "../App"
 import { Area, Climb } from "./Game"
 import { requestGET, requestPOST } from "../helpers/sendRequest"
 
 enum RoundEnum {
+    "Three" = 3,
     "Five" = 5,
-    "Ten" = 10,
-    "Twenty" = 20
+    "Eight" = 8
 }
 
 interface RoundSelectButton {
@@ -23,12 +25,13 @@ export default function Menu({gameStatus, setGameStatus}: Props) {
     // Menu to show up on initial launch
     // landing page to select areas and explain game
 
+    const [, forceRender] = useState< undefined| boolean >(undefined);
     // init buttons for round selection
-    const [selectedRoundOption, setSelectedRoundOption] = useState<number>(RoundEnum.Five);
+    const [selectedRoundOption, setSelectedRoundOption] = useState<number>(RoundEnum.Three);
     const [selectRoundButtons, setSelectRoundButtons] = useState<Array<RoundSelectButton>>([
-        { rounds: RoundEnum.Five, selected: true },
-        { rounds: RoundEnum.Ten, selected: false },
-        { rounds: RoundEnum.Twenty, selected: false },
+        { rounds: RoundEnum.Three, selected: true },
+        { rounds: RoundEnum.Five, selected: false },
+        { rounds: RoundEnum.Eight, selected: false },
     ])
 
     // get all available areas
@@ -80,11 +83,10 @@ export default function Menu({gameStatus, setGameStatus}: Props) {
     }
 
     const handleGameStart = async () => {
-        console.log("Starting Game");
         const selectedAreas :Array<Area>= [];
         allAreas.forEach((area) => (area.selected ? selectedAreas.push(area.areaObj) : null))        
         const climbs :Array<Climb> = await populateGame(selectedRoundOption, selectedAreas);
-        console.log("in handle game start", climbs);
+        console.log("Starting game with:", climbs);
         setGameStatus({
             mode: GameMode.Running,
             climbs: climbs,
@@ -152,13 +154,15 @@ export default function Menu({gameStatus, setGameStatus}: Props) {
                 sessionStorage.setItem("token", resJSON.jwtToken);
                 sessionStorage.setItem("userID", resJSON.user._id);
                 sessionStorage.setItem("username", resJSON.user.username);
+
+                forceRender((prev) => !prev);
             }
         }
     }
 
     const handleRegister : React.FormEventHandler<HTMLButtonElement> = async (e) => {
         e.preventDefault();
-        const url = sessionStorage.getItem("apiURL") + "/login";
+        const url = sessionStorage.getItem("apiURL") + "/register";
         const response = await fetch(url, {
             method: "POST",
             mode: "cors",
@@ -181,6 +185,8 @@ export default function Menu({gameStatus, setGameStatus}: Props) {
                 sessionStorage.setItem("token", resJSON.jwtToken);
                 sessionStorage.setItem("userID", resJSON.user._id);
                 sessionStorage.setItem("username", resJSON.user.username);
+
+                forceRender((prev) => !prev)
             }
         }
     }
